@@ -1,50 +1,57 @@
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <unistd.h>
-struct thread {
-    int nPoints;
-    int hits;
-};
-double getRandomNumber() {
-    return (double)rand() / RAND_MAX * 2 - 1;
-}
-void* pi_thread(void* arg) {
-    struct thread* t = (struct thread*)arg;
-    for(int i = 0; i < t->nPoints; i++) {
-        double x = getRandomNumber();
-        double y = getRandomNumber();
-        if(x*x + y*y <= 1) {
-            t->hits++;
-        }
-    }
-    return NULL;
-}
-int main(int argc, char **argv) {
-    srand(time(NULL));
-    int n = 10;
-    int nPoints = atoi(argv[1]);
-    int pointEachThread = nPoints / n;
-    pthread_t* threads = malloc(n * sizeof(pthread_t));
-    struct thread* args = malloc(n * sizeof(struct thread));
-    int i;
-    for(i = 0; i < n; i++) {
-        args[i].nPoints = pointEachThread;
-        args[i].hits = 0;
-        pthread_create(&threads[i], NULL, pi_thread, &args[i]);
-    }
-    for(i = 0 ; i < n; i++) {
-        pthread_join(threads[i], NULL);
-    }
-    double pi = 0;
-    for(i = 0; i < n; i++) {
-        pi += args[i].hits;
-    }
-    pi = 4*((double)pi/(double)nPoints);
-    printf("pi = %f\n", pi);
-    free(threads);
-    free(args);
-    pthread_exit(NULL);
-    return 0;
-}
+#include <math.h>
+#include <pthread.h>
+
+#define NUM_THREAD 4
+
+void* circle_point(void *param);
+
+pthread_t tid[NUM_THREAD]={0};
+int count[NUM_THREAD]={0};
+clock_t start_time, end_time;
+static long int total_point;
+static long int count_circle=0;
+
+
+int main(int argc, char const *argv[]){
+   if(argc==1){
+       printf("Enter number point\n");
+       return -1;
+      }
+
+   if(argc!=2){
+       printf("Argument is wrong\n");
+       return -1;
+     }
+
+   total_point=atoll(argv[1])/NUM_THREAD;
+
+   start_time= clock();
+   srand(time(NULL));
+   static int i;
+   for(i=0; i<NUM_THREAD;i++)
+   pthread_create(&tid[i],NULL,circle_point,&count[i]);
+   for(i=0;i<NUM_THREAD;i++){
+       pthread_join(tid[i],NULL);
+       count_circle+=count[i];
+     }
+   double pi=4.0*(double)count_circle/(double)total_point/(double)NUM_THREAD;
+   end_time=clock();
+
+   printf("PI = %17.15f\n",pi);
+   printf("Time to compute= %g second\n",(double)(end_time-start_time)/CLOCKS_PER_SEC);
+   return 0;
+  }
+
+void* circle_point(void *param){
+   int *pcount= (int*)param;
+   int i;
+   for(i=0; i<total_point;i++){
+       double x= (double)rand()/(double)RAND_MAX;
+       double y=(double)rand()/(double)RAND_MAX;
+       double r= sqrt(x*x+y*y);
+       if(r<=1) *pcount=*pcount+1;
+     }
+   pthread_exit(0);

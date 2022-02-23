@@ -35,8 +35,14 @@ int main(int argc, char* argv[]) {
         pthread_join(thread[i], NULL);
         counter += counts[i];
     }
-    printf("PI: %f\n", 4.0 * counter / atol(argv[1]));
+    
+    double pi = 4.0 * counter / atol(argv[1]);
     clock_t endTime = clock();
-    printf("Time: %f seconds\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
+    double time_spent = (double)(endTime - startTime) / CLOCKS_PER_SEC;
+    
+    
+    printf("Pi: %lf\nTime: %lf seconds\n",pi,time_spent);
+    pthread_exit(NULL);
+    return 0;
 
 }

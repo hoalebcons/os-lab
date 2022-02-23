@@ -22,8 +22,12 @@ int main(int argc, char* argv[])
     long points = atol(argv[1]);
     generate(points, &count);
     
-    printf("PI: %f\n", 4.0 * count / atol(argv[1]));
+    double pi = 4.0 * count / atol(argv[1]);
     clock_t endTime = clock();
-    printf("Time: %f seconds\n", (double)(endTime - startTime) / CLOCKS_PER_SEC);
+    double time_spent = (double)(endTime - startTime) / CLOCKS_PER_SEC;
+    
+    
+    printf("Pi: %lf\nTime: %lf seconds\n",pi,time_spent);
     return 0;
+
 }
